@@ -10,3 +10,60 @@
  ✓ Starting...
  ✓ Ready in 1371ms
  ○ Compiling /signup ...
+ ✓ Compiled /signup    Reload env: .env
+      Reload env: .e      Reload env: .e     Reload env: .en   Reload env: .env
+     Reload env: .en      Reload env: .e      Reload env: .e      Reload env: .e   Reload env: .env
+     Reload env: .en      Reload env: .e     Reload env: .en      Reload env: .e   Reload env: .env
+   Reload env: .env
+      Reload env: .env
+At': '2025-09-21T21:47:30.339+00:00',
+  userId: '68d06b8f00096cf378b6',
+  expire: '2026-09-21T21:47:30.329+00:00',
+  provider: 'email',
+  providerUid: 'daktaras@gmail.com',
+  providerAccessToken: '',
+  providerAccessTokenExpiry: '',
+  providerRefreshToken: '',
+  ip: '2a00:1eb8:c2af:b3da:3cda:4cdb:58e9:6fee',
+  osCode: 'WIN',
+  osName: 'Windows',
+  osVersion: '95',
+  clientType: '',
+  clientCode: '',
+  clientName: '',
+  clientVersion: '',
+  clientEngine: '',
+  clientEngineVersion: '',
+  deviceName: 'desktop',
+  deviceBrand: '',
+  deviceModel: '',
+  countryCode: 'lt',
+  countryName: 'Lithuania',
+  current: true,
+  factors: [ 'password' ],
+  secret: 'eyJpZCI6IjY4ZDA2YjhmMDAwOTZjZjM3OGI2Iiwic2VjcmV0IjoiMDc0ODkyOTI5YTkwZDZmMmEwODRkM2EzYmFiODAyMThmOTczYTQ5NmRkNjg2YTViMWM4MmI2M2RmNmJiYjZiMzM5YTM4YmUxNWRhYTc3OWZjNmExMWRkNTBhMzBiM2JhYmUzZDI2NDg0Mzc1YWRiYjJlMjg3Nzg2ZTY3ZjI2NzQ0YjkxZGIxNDczNmQ0MTU2ZGRjZTYzNTdjNjFhNzMxZWMxYjI5NTM4YWEwYTI1ODQyNDQwMGJhNGEyOWFkYzFhODI5MjE4ODBjNjQyZDU3MTUxMjdlNWI3ZWNjYmFkYTRlNzk2YzEwNTdlYjM3NTZjOWQ2ODU1YTNkMzI5MzRhZiJ9',
+  mfaUpdatedAt: ''
+}
+ POST /login 200 in 600ms
+ ✓ Compiled in 372ms
+   Reload env: .env
+   Reload env: .env
+   Reload env: .env
+   Reload env: .env
+   Reload env: .env
+   Reload env: .env
+   Reload env: .env
+   Reload env: .env
+   Reload env: .env
+   Reload env: .env
+ ✓ Compiled in 301ms
+ ✓ Compiled in 269ms
+ ✓ Compiled in 251ms
+ ✓ Compiled in 270ms
+ ✓ Compiled in 300ms
+ ✓ Compiled in 187ms
+ ✓ Compiled in 288ms
+ ✓ Compiled in 265ms
+ ✓ Compiled in 315ms
+ ✓ Compiled in 294ms
+ ✓ Compiled in 272ms
