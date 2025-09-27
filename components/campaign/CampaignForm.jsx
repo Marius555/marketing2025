@@ -299,7 +299,7 @@ export function CampaignForm({ form, platform, onSubmit }) {
                   {field.label}
                   {field.required && <span className="text-destructive ml-1">*</span>}
                 </FormLabel>
-                <Select onValueChange={formField.onChange} defaultValue={formField.value}>
+                <Select onValueChange={formField.onChange} value={formField.value || ''}>
                   <FormControl>
                     <SelectTrigger className="focus:ring-primary">
                       <SelectValue placeholder={`Select ${field.label.toLowerCase()}`} />

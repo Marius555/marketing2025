@@ -1,6 +1,5 @@
 "use client"
 
-import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -8,13 +7,14 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { loginResolver } from "@/resolvers/loginResolver"
 import { LoginUser } from "@/appwrite/loginUser"
+import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 
 export function LoginForm({
   className,
   ...props
 }) {
-  const [submitMessage, setSubmitMessage] = useState("")
-
+  const router = useRouter()
   const {
     register,
     handleSubmit,
@@ -25,18 +25,17 @@ export function LoginForm({
 
   const onSubmit = async (data) => {
     try {
-      setSubmitMessage("")
       const response = await LoginUser(data)
 
       if (response.success) {
-        setSubmitMessage("Login successful!")
-        console.log("Login successful:", response)
+        toast.success("Login successful!")
+        router.push(`/auth/userDashboard/${response.userId}`);
       } else {
-        setSubmitMessage(response.message || "Login failed")
+        toast.error(response.message || "Login failed")
       }
     } catch (error) {
       console.error("Login error:", error)
-      setSubmitMessage("An error occurred during login")
+      toast.error("An error occurred during login")
     }
   }
 
@@ -77,11 +76,6 @@ export function LoginForm({
             <p className="text-sm text-red-500">{errors.password.message}</p>
           )}
         </div>
-        {submitMessage && (
-          <p className={`text-sm ${submitMessage.includes("successful") ? "text-green-500" : "text-red-500"}`}>
-            {submitMessage}
-          </p>
-        )}
         <Button type="submit" className="w-full" disabled={isSubmitting}>
           {isSubmitting ? "Logging in..." : "Login"}
         </Button>

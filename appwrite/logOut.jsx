@@ -4,29 +4,23 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 export async function LogoutUser() {
+    const cookieStore = await cookies();
     try {
         const sessionClient = await clientAction();
         
-        // Check if session client was created successfully
-        if (!sessionClient.success === false) {
+        if (sessionClient.success !== false) {
             const { account } = sessionClient;
             
             // Delete the current session from Appwrite
             await account.deleteSession('current');
         }
-        
-        // Clear all authentication cookies
-        const cookieStore = await cookies();
         cookieStore.delete("appSession");
-        // cookieStore.delete("localSession");
+        cookieStore.delete("localSession");
         
         return { success: true, message: "Logged out successfully" };
     } catch (error) {
-        // Even if there's an error with Appwrite, clear local cookies
-        const cookieStore = await cookies();
         cookieStore.delete("appSession");
-        // cookieStore.delete("localSession");
-        
+        cookieStore.delete("localSession");
         return { success: true, message: "Logged out successfully" };
     }
 }

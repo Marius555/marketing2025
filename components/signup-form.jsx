@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { signupResolver } from "@/resolvers/signupResolver"
 import { createUser } from "@/appwrite/createUser"
+import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 
 export function SignupForm({
   className,
@@ -19,13 +21,24 @@ export function SignupForm({
   } = useForm({
     resolver: signupResolver,
   })
+  const router = useRouter()
 
   const onSubmit = async (data) => {
     try {
+      console.log("Signup form data:", data) // Debug log
+
       const resp = await createUser(data)
-      console.log("Signup response:", resp)
+      console.log("Signup response:", resp) // Debug log
+
+      if(resp.success){
+        toast.success("Account created successfully!")
+        router.push(`/auth/userDashboard/${resp.userId}`)
+      } else {
+        toast.error(resp.message || "Signup failed. Please try again.")
+      }
     } catch (error) {
       console.error("Signup error:", error)
+      toast.error("An unexpected error occurred. Please try again.")
     }
   }
 

@@ -1,9 +1,13 @@
 import React from 'react'
+import { AnalyticsDashboard } from '@/components/analytics/AnalyticsDashboard'
 import { DashboardSidebar } from '@/components/layout/DashboardSidebar'
 import { DashboardHeader } from '@/components/layout/DashboardHeader'
-import { DashboardOverview } from '@/components/dashboard/DashboardOverview'
 
-const UserDashboard = () => {
+const AnalyticsPage = ({ params }) => {
+  const { id } = React.use(params)
+
+  console.log('Analytics Page ID:', id)
+
   return (
     <div className="flex h-screen bg-background">
       {/* Sidebar */}
@@ -14,17 +18,17 @@ const UserDashboard = () => {
         {/* Header */}
         <DashboardHeader />
 
-        {/* Main Dashboard Content */}
+        {/* Main Content */}
         <main className="flex-1 overflow-auto">
           <div className="container mx-auto p-6">
             <div className="mb-6">
-              <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+              <h1 className="text-3xl font-bold tracking-tight">Analytics</h1>
               <p className="text-muted-foreground">
-                Overview of your marketing campaigns and performance metrics.
+                Analytics dashboard for user: {id}
               </p>
             </div>
 
-            <DashboardOverview />
+            <AnalyticsDashboard />
           </div>
         </main>
       </div>
@@ -32,4 +36,4 @@ const UserDashboard = () => {
   )
 }
 
-export default UserDashboard
+export default AnalyticsPage

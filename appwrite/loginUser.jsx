@@ -2,12 +2,27 @@
 import { adminAction } from "./adminOrClient";
 import { cookies } from "next/headers";
 import { encryptData } from "../lib/encrypt";
-// import { createLocalCookie } from "./createLocalCookie";
+import { redirect } from "next/navigation";
+
+// Input validation functions
+function validateEmail(email) {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
 
 export async function LoginUser(data) {
   try {
-    const email = await data.email.trim();
-    const password = await data.password;
+    const email = data.email?.trim();
+    const password = data.password;
+
+    // Input validation
+    if (!email || !validateEmail(email)) {
+      return { success: false, message: "Please provide a valid email address" };
+    }
+
+    if (!password) {
+      return { success: false, message: "Password is required" };
+    }
 
     const { account } = await adminAction();
 
@@ -18,11 +33,20 @@ export async function LoginUser(data) {
     const jwt = await encryptData(user, timeToExpire);
     const cookieStore = await cookies();
 
+    // Debug logging for development
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Login: Setting cookies', {
+        userId: user,
+        expiresAt: timeToExpire,
+        isSecure: process.env.NODE_ENV === 'production'
+      });
+    }
+
     cookieStore.set("appSession", session.secret, {
       path: "/",
       httpOnly: true,
       sameSite: "strict",
-      secure: true,
+      secure: process.env.NODE_ENV === 'production',
       expires: timeToExpire,
     });
 
@@ -30,12 +54,23 @@ export async function LoginUser(data) {
       path: "/",
       httpOnly: true,
       sameSite: "strict",
-      secure: true,
+      secure: process.env.NODE_ENV === 'production',
       expires: timeToExpire,
     });
 
-    return { success: true, message: "User Created Successfull" };
+    return { success: true, message: "Login successful", userId: user };
   } catch (error) {
-    return { success: false, message: error.message || "An error occurred" };
+    console.error("Login error:", error);
+
+    // Sanitize error messages - don't expose internal details
+    if (error.message?.includes("invalid_credentials") || error.message?.includes("Invalid credentials")) {
+      return { success: false, message: "Invalid email or password" };
+    }
+
+    if (error.message?.includes("user_not_found") || error.message?.includes("not found")) {
+      return { success: false, message: "Invalid email or password" };
+    }
+
+    return { success: false, message: "Login failed. Please try again." };
   }
 }

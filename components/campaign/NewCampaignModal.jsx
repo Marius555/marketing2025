@@ -30,7 +30,8 @@ export function NewCampaignModal({ open, onOpenChange }) {
       name: '',
       budgetMin: '',
       budgetMax: '',
-      dateRange: { start: '', end: '' },
+      currency: 'USD',
+      dateRange: { start: null, end: null },
       description: '',
       enhanceWithAI: false,
       // Reddit fields
@@ -43,6 +44,7 @@ export function NewCampaignModal({ open, onOpenChange }) {
       audience: '',
       adFormat: '',
       creative: '',
+      mediaFiles: [],
       // Instagram fields
       contentType: '',
       caption: '',
