@@ -239,10 +239,10 @@ const commonFields = [
     required: true
   },
   {
-    name: 'budgetRange',
-    label: 'Budget Range',
-    type: 'budgetRange',
-    description: 'Set your minimum and maximum budget for this campaign',
+    name: 'budget',
+    label: 'Budget',
+    type: 'budget',
+    description: 'Set your budget for this campaign',
     required: true
   },
   {
@@ -270,8 +270,7 @@ const commonFields = [
 ]
 
 export function CampaignForm({ form, platform, onSubmit }) {
-  const [minCurrencyPopoverOpen, setMinCurrencyPopoverOpen] = React.useState(false)
-  const [maxCurrencyPopoverOpen, setMaxCurrencyPopoverOpen] = React.useState(false)
+  const [currencyPopoverOpen, setCurrencyPopoverOpen] = React.useState(false)
   const platformFields = platformConfigs[platform?.id] || { fields: [] }
   const allFields = [...commonFields, ...platformFields.fields]
 
@@ -301,7 +300,7 @@ export function CampaignForm({ form, platform, onSubmit }) {
                 </FormLabel>
                 <Select onValueChange={formField.onChange} value={formField.value || ''}>
                   <FormControl>
-                    <SelectTrigger className="focus:ring-primary">
+                    <SelectTrigger className="w-full focus:ring-primary">
                       <SelectValue placeholder={`Select ${field.label.toLowerCase()}`} />
                     </SelectTrigger>
                   </FormControl>
@@ -375,7 +374,7 @@ export function CampaignForm({ form, platform, onSubmit }) {
           />
         )
 
-      case 'budgetRange':
+      case 'budget':
         return (
           <FormItem key={field.name}>
             <FormLabel className="flex items-center gap-2">
@@ -394,159 +393,77 @@ export function CampaignForm({ form, platform, onSubmit }) {
               )}
             />
 
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="budgetMin"
-                rules={{
-                  required: field.required ? 'Minimum budget is required' : false,
-                  min: { value: 1, message: 'Minimum budget must be at least 1' }
-                }}
-                render={({ field: minField, fieldState: minFieldState }) => {
-                  const selectedCurrency = form.watch('currency') || 'USD'
-                  const currencyObj = currencies.find(c => c.value === selectedCurrency) || currencies[0]
+            <FormField
+              control={form.control}
+              name="budget"
+              rules={{
+                required: field.required ? 'Budget is required' : false,
+                min: { value: 1, message: 'Budget must be at least 1' }
+              }}
+              render={({ field: budgetField, fieldState: budgetFieldState }) => {
+                const selectedCurrency = form.watch('currency') || 'USD'
+                const currencyObj = currencies.find(c => c.value === selectedCurrency) || currencies[0]
 
-                  return (
-                    <FormItem>
-                      <FormLabel className="text-xs text-muted-foreground">Minimum Budget</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <Popover open={minCurrencyPopoverOpen} onOpenChange={setMinCurrencyPopoverOpen}>
-                            <PopoverTrigger asChild>
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                className="absolute left-1 top-1/2 transform -translate-y-1/2 h-7 px-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 border-r border-border"
-                              >
-                                {currencyObj.symbol}
-                                <ChevronDown className="h-3 w-3 ml-1" />
-                              </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-64 p-2" align="start">
-                              <div className="space-y-1">
-                                <div className="text-sm font-medium text-foreground mb-2">Select Currency</div>
-                                {currencies.map((currency) => (
-                                  <Button
-                                    key={currency.value}
-                                    type="button"
-                                    variant="ghost"
-                                    size="sm"
-                                    className={cn(
-                                      "w-full justify-start text-left h-8",
-                                      selectedCurrency === currency.value && "bg-primary/10 text-primary"
-                                    )}
-                                    onClick={() => {
-                                      form.setValue('currency', currency.value)
-                                      setMinCurrencyPopoverOpen(false)
-                                    }}
-                                  >
-                                    <span className="font-mono mr-2">{currency.symbol}</span>
-                                    <span className="text-xs">{currency.label}</span>
-                                  </Button>
-                                ))}
-                              </div>
-                            </PopoverContent>
-                          </Popover>
-                          <Input
-                            placeholder="500"
-                            {...minField}
-                            type="number"
-                            min="1"
-                            className={cn(
-                              "pl-16 focus:ring-primary",
-                              minFieldState.error && "border-destructive"
-                            )}
-                          />
-                        </div>
-                      </FormControl>
-                      {minFieldState.error && (
-                        <FormMessage className="text-xs">{minFieldState.error.message}</FormMessage>
-                      )}
-                    </FormItem>
-                  )
-                }}
-              />
-              <FormField
-                control={form.control}
-                name="budgetMax"
-                rules={{
-                  required: field.required ? 'Maximum budget is required' : false,
-                  min: { value: 1, message: 'Maximum budget must be at least 1' },
-                  validate: (value) => {
-                    const minValue = form.getValues('budgetMin')
-                    if (minValue && value && parseInt(value) < parseInt(minValue)) {
-                      return 'Maximum budget must be greater than minimum budget'
-                    }
-                    return true
-                  }
-                }}
-                render={({ field: maxField, fieldState: maxFieldState }) => {
-                  const selectedCurrency = form.watch('currency') || 'USD'
-                  const currencyObj = currencies.find(c => c.value === selectedCurrency) || currencies[0]
-
-                  return (
-                    <FormItem>
-                      <FormLabel className="text-xs text-muted-foreground">Maximum Budget</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <Popover open={maxCurrencyPopoverOpen} onOpenChange={setMaxCurrencyPopoverOpen}>
-                            <PopoverTrigger asChild>
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                className="absolute left-1 top-1/2 transform -translate-y-1/2 h-7 px-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 border-r border-border"
-                              >
-                                {currencyObj.symbol}
-                                <ChevronDown className="h-3 w-3 ml-1" />
-                              </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-64 p-2" align="start">
-                              <div className="space-y-1">
-                                <div className="text-sm font-medium text-foreground mb-2">Select Currency</div>
-                                {currencies.map((currency) => (
-                                  <Button
-                                    key={currency.value}
-                                    type="button"
-                                    variant="ghost"
-                                    size="sm"
-                                    className={cn(
-                                      "w-full justify-start text-left h-8",
-                                      selectedCurrency === currency.value && "bg-primary/10 text-primary"
-                                    )}
-                                    onClick={() => {
-                                      form.setValue('currency', currency.value)
-                                      setMaxCurrencyPopoverOpen(false)
-                                    }}
-                                  >
-                                    <span className="font-mono mr-2">{currency.symbol}</span>
-                                    <span className="text-xs">{currency.label}</span>
-                                  </Button>
-                                ))}
-                              </div>
-                            </PopoverContent>
-                          </Popover>
-                          <Input
-                            placeholder="2000"
-                            {...maxField}
-                            type="number"
-                            min="1"
-                            className={cn(
-                              "pl-16 focus:ring-primary",
-                              maxFieldState.error && "border-destructive"
-                            )}
-                          />
-                        </div>
-                      </FormControl>
-                      {maxFieldState.error && (
-                        <FormMessage className="text-xs">{maxFieldState.error.message}</FormMessage>
-                      )}
-                    </FormItem>
-                  )
-                }}
-              />
-            </div>
+                return (
+                  <FormItem>
+                    <FormControl>
+                      <div className="relative">
+                        <Popover open={currencyPopoverOpen} onOpenChange={setCurrencyPopoverOpen}>
+                          <PopoverTrigger asChild>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="absolute left-1 top-1/2 transform -translate-y-1/2 h-7 px-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 border-r border-border"
+                            >
+                              {currencyObj.symbol}
+                              <ChevronDown className="h-3 w-3 ml-1" />
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-64 p-2" align="start">
+                            <div className="space-y-1">
+                              <div className="text-sm font-medium text-foreground mb-2">Select Currency</div>
+                              {currencies.map((currency) => (
+                                <Button
+                                  key={currency.value}
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  className={cn(
+                                    "w-full justify-start text-left h-8",
+                                    selectedCurrency === currency.value && "bg-primary/10 text-primary"
+                                  )}
+                                  onClick={() => {
+                                    form.setValue('currency', currency.value)
+                                    setCurrencyPopoverOpen(false)
+                                  }}
+                                >
+                                  <span className="font-mono mr-2">{currency.symbol}</span>
+                                  <span className="text-xs">{currency.label}</span>
+                                </Button>
+                              ))}
+                            </div>
+                          </PopoverContent>
+                        </Popover>
+                        <Input
+                          placeholder="1000"
+                          {...budgetField}
+                          type="number"
+                          min="1"
+                          className={cn(
+                            "pl-16 focus:ring-primary",
+                            budgetFieldState.error && "border-destructive"
+                          )}
+                        />
+                      </div>
+                    </FormControl>
+                    {budgetFieldState.error && (
+                      <FormMessage className="text-xs">{budgetFieldState.error.message}</FormMessage>
+                    )}
+                  </FormItem>
+                )
+              }}
+            />
             <FormDescription>{field.description}</FormDescription>
           </FormItem>
         )

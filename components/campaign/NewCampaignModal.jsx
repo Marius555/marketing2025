@@ -28,8 +28,7 @@ export function NewCampaignModal({ open, onOpenChange }) {
       // Common fields
       platform: '',
       name: '',
-      budgetMin: '',
-      budgetMax: '',
+      budget: '',
       currency: 'USD',
       dateRange: { start: null, end: null },
       description: '',
@@ -122,11 +121,7 @@ export function NewCampaignModal({ open, onOpenChange }) {
             )}
           </div>
 
-          <div className="flex space-x-2">
-            <Button variant="outline" onClick={handleClose}>
-              Cancel
-            </Button>
-
+          <div>
             {currentStep === STEPS.CAMPAIGN_DETAILS && (
               <Button
                 onClick={form.handleSubmit(onSubmit)}
