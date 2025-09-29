@@ -22,6 +22,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Calendar, DollarSign, FileText, Hash, Globe, Users, Target, Sparkles, ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -40,6 +41,75 @@ const currencies = [
   { value: 'NOK', label: 'NOK (kr)', symbol: 'kr' },
   { value: 'DKK', label: 'DKK (kr)', symbol: 'kr' },
 ]
+
+const targetAudienceOptions = {
+  demographics: [
+    { value: 'age_18_24', label: '18-24 years', category: 'Age Groups' },
+    { value: 'age_25_34', label: '25-34 years', category: 'Age Groups' },
+    { value: 'age_35_44', label: '35-44 years', category: 'Age Groups' },
+    { value: 'age_45_54', label: '45-54 years', category: 'Age Groups' },
+    { value: 'age_55_65', label: '55-65 years', category: 'Age Groups' },
+    { value: 'age_65_plus', label: '65+ years', category: 'Age Groups' },
+    { value: 'gender_all', label: 'All Genders', category: 'Gender' },
+    { value: 'gender_male', label: 'Male', category: 'Gender' },
+    { value: 'gender_female', label: 'Female', category: 'Gender' },
+    { value: 'gender_non_binary', label: 'Non-binary', category: 'Gender' },
+  ],
+  professions: [
+    { value: 'business_owners', label: 'Business Owners', category: 'Professions' },
+    { value: 'entrepreneurs', label: 'Entrepreneurs', category: 'Professions' },
+    { value: 'marketing_professionals', label: 'Marketing Professionals', category: 'Professions' },
+    { value: 'software_developers', label: 'Software Developers', category: 'Professions' },
+    { value: 'designers', label: 'Designers', category: 'Professions' },
+    { value: 'students', label: 'Students', category: 'Professions' },
+    { value: 'healthcare_workers', label: 'Healthcare Workers', category: 'Professions' },
+    { value: 'teachers', label: 'Teachers & Educators', category: 'Professions' },
+    { value: 'sales_professionals', label: 'Sales Professionals', category: 'Professions' },
+    { value: 'consultants', label: 'Consultants', category: 'Professions' },
+    { value: 'executives', label: 'C-Level Executives', category: 'Professions' },
+    { value: 'freelancers', label: 'Freelancers', category: 'Professions' },
+  ],
+  interests: [
+    { value: 'technology', label: 'Technology', category: 'Interests' },
+    { value: 'business', label: 'Business & Finance', category: 'Interests' },
+    { value: 'marketing', label: 'Marketing & Advertising', category: 'Interests' },
+    { value: 'health_fitness', label: 'Health & Fitness', category: 'Interests' },
+    { value: 'travel', label: 'Travel', category: 'Interests' },
+    { value: 'food_cooking', label: 'Food & Cooking', category: 'Interests' },
+    { value: 'fashion_beauty', label: 'Fashion & Beauty', category: 'Interests' },
+    { value: 'sports', label: 'Sports', category: 'Interests' },
+    { value: 'gaming', label: 'Gaming', category: 'Interests' },
+    { value: 'entertainment', label: 'Entertainment', category: 'Interests' },
+    { value: 'education', label: 'Education & Learning', category: 'Interests' },
+    { value: 'home_garden', label: 'Home & Garden', category: 'Interests' },
+  ],
+  industries: [
+    { value: 'saas', label: 'SaaS & Software', category: 'Industries' },
+    { value: 'ecommerce', label: 'E-commerce', category: 'Industries' },
+    { value: 'healthcare', label: 'Healthcare', category: 'Industries' },
+    { value: 'education', label: 'Education', category: 'Industries' },
+    { value: 'finance', label: 'Finance & Banking', category: 'Industries' },
+    { value: 'real_estate', label: 'Real Estate', category: 'Industries' },
+    { value: 'retail', label: 'Retail', category: 'Industries' },
+    { value: 'hospitality', label: 'Hospitality & Tourism', category: 'Industries' },
+    { value: 'automotive', label: 'Automotive', category: 'Industries' },
+    { value: 'nonprofit', label: 'Non-profit', category: 'Industries' },
+    { value: 'manufacturing', label: 'Manufacturing', category: 'Industries' },
+    { value: 'media', label: 'Media & Publishing', category: 'Industries' },
+  ],
+  behaviors: [
+    { value: 'online_shoppers', label: 'Frequent Online Shoppers', category: 'Behaviors' },
+    { value: 'social_media_active', label: 'Social Media Active Users', category: 'Behaviors' },
+    { value: 'early_adopters', label: 'Early Technology Adopters', category: 'Behaviors' },
+    { value: 'mobile_users', label: 'Mobile-first Users', category: 'Behaviors' },
+    { value: 'video_consumers', label: 'Video Content Consumers', category: 'Behaviors' },
+    { value: 'podcast_listeners', label: 'Podcast Listeners', category: 'Behaviors' },
+    { value: 'newsletter_subscribers', label: 'Newsletter Subscribers', category: 'Behaviors' },
+    { value: 'app_users', label: 'Mobile App Users', category: 'Behaviors' },
+    { value: 'brand_conscious', label: 'Brand Conscious Consumers', category: 'Behaviors' },
+    { value: 'price_sensitive', label: 'Price Sensitive Shoppers', category: 'Behaviors' },
+  ]
+}
 
 const platformConfigs = {
   reddit: {
@@ -80,6 +150,16 @@ const platformConfigs = {
         placeholder: 'Write your post content here...',
         description: 'Provide value to the community while promoting your message',
         required: true
+      },
+      {
+        name: 'mediaFile',
+        label: 'Media File',
+        type: 'fileUpload',
+        accept: 'image/*,video/*',
+        multiple: false,
+        maxFiles: 1,
+        description: 'Upload your image or video for the post (required for image/video posts)',
+        required: false
       }
     ]
   },
@@ -102,9 +182,8 @@ const platformConfigs = {
       {
         name: 'audience',
         label: 'Target Audience',
-        type: 'text',
-        placeholder: 'e.g., Tech professionals, 25-45, interested in productivity',
-        description: 'Describe your target audience demographics and interests',
+        type: 'multiSelect',
+        description: 'Select demographics, interests, and behaviors that match your target audience',
         required: true
       },
       {
@@ -136,12 +215,8 @@ const platformConfigs = {
         accept: 'image/*,video/*',
         multiple: true,
         maxFiles: 10,
-        description: 'Upload images or videos for your ad creative',
-        required: false,
-        conditional: {
-          field: 'adFormat',
-          showWhen: ['single_image', 'single_video', 'carousel', 'collection']
-        }
+        description: 'Upload images or videos for your ad creative (required for most ad formats)',
+        required: false
       }
     ]
   },
@@ -180,10 +255,19 @@ const platformConfigs = {
       {
         name: 'targetAudience',
         label: 'Target Audience',
-        type: 'text',
-        placeholder: 'e.g., Small business owners, creators, marketing professionals',
-        description: 'Who do you want to reach with this content?',
+        type: 'multiSelect',
+        description: 'Select demographics, interests, and behaviors that match your target audience',
         required: true
+      },
+      {
+        name: 'mediaFiles',
+        label: 'Media Files',
+        type: 'fileUpload',
+        accept: 'image/*,video/*',
+        multiple: true,
+        maxFiles: 10,
+        description: 'Upload images or videos for your Instagram content',
+        required: false
       }
     ]
   },
@@ -275,8 +359,8 @@ export function CampaignForm({ form, platform, onSubmit }) {
   const allFields = [...commonFields, ...platformFields.fields]
 
   const renderField = (field) => {
-    // Handle conditional fields
-    if (field.conditional) {
+    // Handle conditional fields (excluding file upload fields which are now always visible)
+    if (field.conditional && field.type !== 'fileUpload') {
       const conditionalValue = form.watch(field.conditional.field)
       if (!field.conditional.showWhen.includes(conditionalValue)) {
         return null
@@ -393,77 +477,103 @@ export function CampaignForm({ form, platform, onSubmit }) {
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="budget"
-              rules={{
-                required: field.required ? 'Budget is required' : false,
-                min: { value: 1, message: 'Budget must be at least 1' }
-              }}
-              render={({ field: budgetField, fieldState: budgetFieldState }) => {
-                const selectedCurrency = form.watch('currency') || 'USD'
-                const currencyObj = currencies.find(c => c.value === selectedCurrency) || currencies[0]
+            <div className="flex gap-3 w-full">
+              {/* Budget Amount Field */}
+              <FormField
+                control={form.control}
+                name="budget"
+                rules={{
+                  required: field.required ? 'Budget is required' : false,
+                  min: { value: 1, message: 'Budget must be at least 1' }
+                }}
+                render={({ field: budgetField, fieldState: budgetFieldState }) => {
+                  const selectedCurrency = form.watch('currency') || 'USD'
+                  const currencyObj = currencies.find(c => c.value === selectedCurrency) || currencies[0]
 
-                return (
-                  <FormItem>
+                  return (
+                    <FormItem className="flex-[2]">
+                      <FormControl>
+                        <div className="relative">
+                          <Popover open={currencyPopoverOpen} onOpenChange={setCurrencyPopoverOpen}>
+                            <PopoverTrigger asChild>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                className="absolute left-1 top-1/2 transform -translate-y-1/2 h-7 px-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 border-r border-border"
+                              >
+                                {currencyObj.symbol}
+                                <ChevronDown className="h-3 w-3 ml-1" />
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-64 p-2" align="start">
+                              <div className="space-y-1">
+                                <div className="text-sm font-medium text-foreground mb-2">Select Currency</div>
+                                {currencies.map((currency) => (
+                                  <Button
+                                    key={currency.value}
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    className={cn(
+                                      "w-full justify-start text-left h-8",
+                                      selectedCurrency === currency.value && "bg-primary/10 text-primary"
+                                    )}
+                                    onClick={() => {
+                                      form.setValue('currency', currency.value)
+                                      setCurrencyPopoverOpen(false)
+                                    }}
+                                  >
+                                    <span className="font-mono mr-2">{currency.symbol}</span>
+                                    <span className="text-xs">{currency.label}</span>
+                                  </Button>
+                                ))}
+                              </div>
+                            </PopoverContent>
+                          </Popover>
+                          <Input
+                            placeholder="1000"
+                            {...budgetField}
+                            type="number"
+                            min="1"
+                            className={cn(
+                              "pl-16 focus:ring-primary",
+                              budgetFieldState.error && "border-destructive"
+                            )}
+                          />
+                        </div>
+                      </FormControl>
+                      {budgetFieldState.error && (
+                        <FormMessage className="text-xs">{budgetFieldState.error.message}</FormMessage>
+                      )}
+                    </FormItem>
+                  )
+                }}
+              />
+
+              {/* Budget Type Field */}
+              <FormField
+                control={form.control}
+                name="budgetType"
+                rules={{ required: field.required ? 'Budget type is required' : false }}
+                render={({ field: budgetTypeField }) => (
+                  <FormItem className="flex-[1]">
                     <FormControl>
-                      <div className="relative">
-                        <Popover open={currencyPopoverOpen} onOpenChange={setCurrencyPopoverOpen}>
-                          <PopoverTrigger asChild>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              className="absolute left-1 top-1/2 transform -translate-y-1/2 h-7 px-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 border-r border-border"
-                            >
-                              {currencyObj.symbol}
-                              <ChevronDown className="h-3 w-3 ml-1" />
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-64 p-2" align="start">
-                            <div className="space-y-1">
-                              <div className="text-sm font-medium text-foreground mb-2">Select Currency</div>
-                              {currencies.map((currency) => (
-                                <Button
-                                  key={currency.value}
-                                  type="button"
-                                  variant="ghost"
-                                  size="sm"
-                                  className={cn(
-                                    "w-full justify-start text-left h-8",
-                                    selectedCurrency === currency.value && "bg-primary/10 text-primary"
-                                  )}
-                                  onClick={() => {
-                                    form.setValue('currency', currency.value)
-                                    setCurrencyPopoverOpen(false)
-                                  }}
-                                >
-                                  <span className="font-mono mr-2">{currency.symbol}</span>
-                                  <span className="text-xs">{currency.label}</span>
-                                </Button>
-                              ))}
-                            </div>
-                          </PopoverContent>
-                        </Popover>
-                        <Input
-                          placeholder="1000"
-                          {...budgetField}
-                          type="number"
-                          min="1"
-                          className={cn(
-                            "pl-16 focus:ring-primary",
-                            budgetFieldState.error && "border-destructive"
-                          )}
-                        />
-                      </div>
+                      <Select onValueChange={budgetTypeField.onChange} value={budgetTypeField.value || 'daily'}>
+                        <SelectTrigger className="focus:ring-primary w-full">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="daily">Daily</SelectItem>
+                          <SelectItem value="monthly">Monthly</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </FormControl>
-                    {budgetFieldState.error && (
-                      <FormMessage className="text-xs">{budgetFieldState.error.message}</FormMessage>
-                    )}
                   </FormItem>
-                )
-              }}
-            />
+                )}
+              />
+            </div>
+
             <FormDescription>{field.description}</FormDescription>
           </FormItem>
         )
@@ -553,12 +663,14 @@ export function CampaignForm({ form, platform, onSubmit }) {
             name={field.name}
             rules={{ required: field.required ? `${field.label} is required` : false }}
             render={({ field: formField }) => {
-              // Dynamic file upload configuration based on ad format
+              // Dynamic file upload configuration based on ad format or post type
               const adFormat = form.watch('adFormat')
+              const postType = form.watch('postType')
               let accept = field.accept
               let maxFiles = field.maxFiles
               let description = field.description
 
+              // Handle Facebook ad formats
               if (field.name === 'mediaFiles' && adFormat) {
                 switch (adFormat) {
                   case 'single_image':
@@ -586,6 +698,24 @@ export function CampaignForm({ form, platform, onSubmit }) {
                 }
               }
 
+              // Handle Reddit post types
+              if (field.name === 'mediaFile' && postType) {
+                switch (postType) {
+                  case 'image':
+                    accept = 'image/*'
+                    maxFiles = 1
+                    description = 'Upload an image for your Reddit post (JPG, PNG, GIF, WebP)'
+                    break
+                  case 'video':
+                    accept = 'video/*'
+                    maxFiles = 1
+                    description = 'Upload a video for your Reddit post (MP4, MOV, WebM)'
+                    break
+                  default:
+                    break
+                }
+              }
+
               return (
                 <FormItem>
                   <FormLabel className="flex items-center gap-2">
@@ -603,6 +733,130 @@ export function CampaignForm({ form, platform, onSubmit }) {
                     />
                   </FormControl>
                   <FormDescription>{description}</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )
+            }}
+          />
+        )
+
+      case 'multiSelect':
+        return (
+          <FormField
+            key={field.name}
+            control={form.control}
+            name={field.name}
+            rules={{ required: field.required ? `${field.label} is required` : false }}
+            render={({ field: formField }) => {
+              const allOptions = Object.values(targetAudienceOptions).flat()
+              const selectedValues = formField.value || []
+              const [popoverOpen, setPopoverOpen] = React.useState(false)
+
+              const toggleOption = React.useCallback((optionValue) => {
+                const current = selectedValues
+                if (current.includes(optionValue)) {
+                  formField.onChange(current.filter(v => v !== optionValue))
+                } else {
+                  formField.onChange([...current, optionValue])
+                }
+              }, [selectedValues, formField.onChange])
+
+              const getDisplayText = React.useCallback(() => {
+                if (selectedValues.length === 0) {
+                  return ''
+                }
+                const selectedLabels = selectedValues
+                  .map(value => allOptions.find(opt => opt.value === value)?.label)
+                  .filter(Boolean)
+
+                if (selectedLabels.length <= 3) {
+                  return selectedLabels.join(', ')
+                } else {
+                  return `${selectedLabels.slice(0, 2).join(', ')}, +${selectedLabels.length - 2} more`
+                }
+              }, [selectedValues, allOptions])
+
+              const groupedOptions = Object.entries(targetAudienceOptions)
+
+              return (
+                <FormItem>
+                  <FormLabel className="flex items-center gap-2">
+                    <Users className="h-4 w-4 text-primary" />
+                    {field.label}
+                    {field.required && <span className="text-destructive ml-1">*</span>}
+                  </FormLabel>
+                  <FormControl>
+                    <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+                      <PopoverTrigger asChild>
+                        <div
+                          className={cn(
+                            "flex h-9 w-full rounded-md border border-input bg-transparent dark:bg-input/30 px-3 py-1 text-base shadow-xs cursor-pointer",
+                            "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] outline-none",
+                            "disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
+                            "justify-between items-center transition-[color,box-shadow]"
+                          )}
+                          tabIndex={0}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault()
+                              setPopoverOpen(!popoverOpen)
+                            }
+                          }}
+                        >
+                          <span className={cn(
+                            "truncate",
+                            selectedValues.length === 0 && "text-muted-foreground"
+                          )}>
+                            {selectedValues.length === 0
+                              ? 'Select target audience...'
+                              : getDisplayText()
+                            }
+                          </span>
+                          <ChevronDown className="h-4 w-4 opacity-50" />
+                        </div>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-80 p-0" align="start">
+                        <div
+                          className="p-4 space-y-4 max-h-80 overflow-y-auto scroll-smooth"
+                          tabIndex={-1}
+                          role="listbox"
+                          onWheel={(e) => {
+                            // Ensure scroll events are properly handled
+                            e.stopPropagation()
+                          }}
+                        >
+                          {groupedOptions.map(([groupKey, options]) => (
+                            <div key={groupKey} className="space-y-2">
+                              <div className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                                {options[0]?.category || groupKey}
+                              </div>
+                              <div className="grid grid-cols-1 gap-2">
+                                {options.map((option) => (
+                                  <div
+                                    key={option.value}
+                                    className="flex items-center space-x-2 p-2 rounded hover:bg-muted/50"
+                                  >
+                                    <Checkbox
+                                      id={`checkbox-${option.value}`}
+                                      checked={selectedValues.includes(option.value)}
+                                      onCheckedChange={() => toggleOption(option.value)}
+                                    />
+                                    <label
+                                      className="text-sm cursor-pointer flex-1"
+                                      htmlFor={`checkbox-${option.value}`}
+                                    >
+                                      {option.label}
+                                    </label>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  </FormControl>
+                  <FormDescription>{field.description}</FormDescription>
                   <FormMessage />
                 </FormItem>
               )
@@ -662,7 +916,7 @@ export function CampaignForm({ form, platform, onSubmit }) {
             <CardHeader className="pb-4">
               <div className="flex items-center space-x-3">
                 <div className={`h-10 w-10 rounded-lg ${platform.color} flex items-center justify-center`}>
-                  <platform.icon className="h-5 w-5 text-white" />
+                  <platform.icon size={20} className="text-white" />
                 </div>
                 <div className="flex-1">
                   <CardTitle className="text-xl">{platform.name} Campaign</CardTitle>

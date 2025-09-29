@@ -8,18 +8,81 @@ const FileUpload = React.forwardRef(({
   accept,
   multiple = false,
   maxFiles = 1,
+  maxSize = 50 * 1024 * 1024, // 50MB default
   onFilesChange,
   value = [],
   ...props
 }, ref) => {
   const [dragActive, setDragActive] = React.useState(false)
+  const [errors, setErrors] = React.useState([])
   const inputRef = React.useRef(null)
   const files = Array.isArray(value) ? value : value ? [value] : []
 
+  const validateFile = (file) => {
+    const errors = []
+
+    // Size validation
+    if (file.size > maxSize) {
+      errors.push(`File "${file.name}" is too large. Maximum size is ${(maxSize / 1024 / 1024).toFixed(0)}MB.`)
+    }
+
+    // Type validation based on accept prop
+    if (accept) {
+      const acceptedTypes = accept.split(',').map(type => type.trim())
+      const isValidType = acceptedTypes.some(acceptType => {
+        if (acceptType.includes('*')) {
+          const baseType = acceptType.split('/')[0]
+          return file.type.startsWith(baseType + '/')
+        }
+        return file.type === acceptType
+      })
+
+      if (!isValidType) {
+        errors.push(`File "${file.name}" type is not supported. Accepted types: ${accept}`)
+      }
+    }
+
+    return errors
+  }
+
   const handleFiles = (newFiles) => {
+    console.log('🔍 FileUpload handleFiles called with:', newFiles.length, 'files')
+
     const fileArray = Array.from(newFiles)
-    const limitedFiles = multiple ? fileArray.slice(0, maxFiles) : [fileArray[0]]
-    onFilesChange?.(multiple ? limitedFiles : limitedFiles[0])
+    const validationErrors = []
+    const validFiles = []
+
+    fileArray.forEach((file, index) => {
+      console.log(`📁 Processing file ${index}:`, file.name, file.size, 'bytes', file.type)
+      const fileErrors = validateFile(file)
+      if (fileErrors.length > 0) {
+        console.log(`❌ File ${file.name} validation failed:`, fileErrors)
+        validationErrors.push(...fileErrors)
+      } else {
+        console.log(`✅ File ${file.name} validation passed`)
+        validFiles.push(file)
+      }
+    })
+
+    setErrors(validationErrors)
+
+    // Determine final files based on validation and limits
+    let finalFiles
+    if (validFiles.length > 0) {
+      if (multiple) {
+        finalFiles = validFiles.slice(0, maxFiles)
+      } else {
+        finalFiles = validFiles[0] // Single file, not array
+      }
+    } else {
+      finalFiles = multiple ? [] : null
+    }
+
+    console.log('📤 Calling onFilesChange with:', finalFiles)
+    console.log('📤 Type check - multiple:', multiple, 'finalFiles type:', typeof finalFiles, 'isArray:', Array.isArray(finalFiles))
+
+    // Call onFilesChange with consistent data type
+    onFilesChange?.(finalFiles)
   }
 
   const handleDrag = (e) => {
@@ -50,12 +113,19 @@ const FileUpload = React.forwardRef(({
   }
 
   const removeFile = (index) => {
+    console.log('🗑️ Removing file at index:', index)
+    setErrors([]) // Clear errors when removing files
+
+    let updatedFiles
     if (multiple) {
-      const newFiles = files.filter((_, i) => i !== index)
-      onFilesChange?.(newFiles)
+      updatedFiles = files.filter((_, i) => i !== index)
+      console.log('📤 Calling onFilesChange after removal with array:', updatedFiles)
     } else {
-      onFilesChange?.(null)
+      updatedFiles = null
+      console.log('📤 Calling onFilesChange after removal with: null')
     }
+
+    onFilesChange?.(updatedFiles)
   }
 
   const getFileIcon = (file) => {
@@ -95,8 +165,21 @@ const FileUpload = React.forwardRef(({
         <p className="text-xs text-muted-foreground">
           {accept ? `Supports: ${accept}` : 'Any file type'}
           {multiple && ` (max ${maxFiles} files)`}
+          {` • Max size: ${(maxSize / 1024 / 1024).toFixed(0)}MB per file`}
         </p>
       </div>
+
+      {/* Error Messages */}
+      {errors.length > 0 && (
+        <div className="mt-3 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+          <div className="text-sm font-medium text-destructive mb-1">Upload Errors:</div>
+          <ul className="text-xs text-destructive space-y-1">
+            {errors.map((error, index) => (
+              <li key={index}>• {error}</li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {files.length > 0 && (
         <div className="mt-4 space-y-2">

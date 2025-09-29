@@ -10,17 +10,14 @@ import {
   DollarSign,
   Target,
   ChevronLeft,
-  ChevronRight,
-  MessageCircle,
-  Globe,
-  Camera,
-  Hash
+  ChevronRight
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { Badge } from '@/components/ui/badge'
 import { NewCampaignModal } from '@/components/campaign/NewCampaignModal'
+import { RedditIcon, FacebookIcon, InstagramIcon, HackerNewsIcon } from '@/components/icons'
 
 const sidebarItems = [
   {
@@ -58,28 +55,28 @@ const sidebarItems = [
 const platformItems = [
   {
     title: 'Reddit Campaigns',
-    icon: MessageCircle,
+    icon: RedditIcon,
     href: '/auth/userDashboard/reddit',
     badge: '12',
     color: 'bg-orange-500'
   },
   {
     title: 'Facebook Campaigns',
-    icon: Globe,
+    icon: FacebookIcon,
     href: '/auth/userDashboard/facebook',
     badge: '8',
     color: 'bg-blue-500'
   },
   {
     title: 'Instagram Campaigns',
-    icon: Camera,
+    icon: InstagramIcon,
     href: '/auth/userDashboard/instagram',
     badge: '15',
     color: 'bg-pink-500'
   },
   {
     title: 'Hacker News',
-    icon: Hash,
+    icon: HackerNewsIcon,
     href: '/auth/userDashboard/hackernews',
     badge: '3',
     color: 'bg-orange-600'
@@ -189,7 +186,7 @@ export function DashboardSidebar({ className }) {
                   onClick={() => setActiveItem(item.href)}
                 >
                   <div className={cn('h-4 w-4 rounded', item.color, 'flex items-center justify-center')}>
-                    <Icon className="h-3 w-3 text-white" />
+                    <Icon size={12} className="text-white" />
                   </div>
                   {!collapsed && (
                     <span className="flex-1 text-left ml-3">{item.title}</span>

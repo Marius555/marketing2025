@@ -65,4 +65,5 @@ This is a Next.js 15 marketing platform with the following architecture:
 - Middleware automatically handles authentication and session management
 - All dashboard routes are protected and require authentication
 - The app uses server-side encryption for sensitive session data
-- Dont run "npm run dev" after changes, because its already probably runing
+- Dont run "npm run dev" on port 3000, after changes, because its already probably runing
+- Dont run "npm run build"

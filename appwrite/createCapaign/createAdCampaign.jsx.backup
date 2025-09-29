@@ -1,0 +1,307 @@
+"use server";
+
+import { cookies } from "next/headers";
+import { decryptData } from "@/lib/decrypt";
+import { clientAction } from "../adminOrClient";
+import { ID } from "node-appwrite";
+
+// Helper function to sanitize file names for Appwrite
+function sanitizeFileName(fileName) {
+  return fileName
+    .replace(/[^a-zA-Z0-9._-]/g, '_') // Replace special chars with underscore
+    .replace(/_{2,}/g, '_') // Replace multiple underscores with single
+    .substring(0, 100); // Limit length
+}
+
+// Helper function to upload files to Appwrite Storage
+async function uploadFiles(storage, files, campaignId) {
+  if (!files || files.length === 0) return [];
+
+  const uploadedFiles = [];
+
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+
+    // Enhanced file validation
+    if (!file) {
+      console.warn(`Skipping null/undefined file at index ${i}`);
+      continue;
+    }
+
+    if (typeof file !== 'object') {
+      console.warn(`Skipping non-object file at index ${i}:`, typeof file, file);
+      continue;
+    }
+
+    if (!file.name || !file.type) {
+      console.warn(`Skipping invalid file at index ${i} - missing name or type:`, {
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        constructor: file.constructor?.name
+      });
+      continue;
+    }
+
+    // Check if it's actually a File or Blob object
+    if (!(file instanceof File) && !(file instanceof Blob)) {
+      console.warn(`Skipping non-File/Blob object at index ${i}:`, file.constructor?.name);
+      continue;
+    }
+
+    try {
+      const sanitizedName = sanitizeFileName(file.name);
+      const fileId = `${campaignId}_${Date.now()}_${i}_${sanitizedName}`;
+
+      console.log(`Uploading file: ${file.name} as ${fileId}`);
+
+      const uploadResult = await storage.createFile(
+        process.env.BUCKET_ID,
+        fileId,
+        file
+      );
+
+      const fileUrl = `${process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT}/storage/buckets/${process.env.BUCKET_ID}/files/${uploadResult.$id}/view`;
+
+      uploadedFiles.push({
+        id: uploadResult.$id,
+        url: fileUrl,
+        name: file.name,
+        size: file.size,
+        type: file.type
+      });
+
+      console.log(`File uploaded successfully: ${file.name} -> ${fileUrl}`);
+    } catch (error) {
+      console.error(`Failed to upload file ${file.name}:`, error);
+      throw new Error(`Failed to upload file: ${file.name}`);
+    }
+  }
+
+  return uploadedFiles;
+}
+
+export async function createAdCampaign(campaignData) {
+  try {
+    if (!process.env.DATABASE_ID || !process.env.CAMPAIGNS_COLLECTION || !process.env.BUCKET_ID) {
+      return { success: false, message: "Database configuration missing. Please contact support." };
+    }
+
+    const cookieStore = await cookies();
+    const localSession = cookieStore.get("localSession");
+
+    if (!localSession?.value) {
+      return { success: false, message: "Authentication required. Please log in." };
+    }
+
+    let userId;
+    try {
+      const decryptedData = await decryptData(localSession.value);
+      userId = decryptedData.userId || decryptedData;
+    } catch (error) {
+      console.error("Failed to decrypt session:", error);
+      return { success: false, message: "Invalid session. Please log in again." };
+    }
+
+    if (!userId) {
+      return { success: false, message: "User ID not found. Please log in again." };
+    }
+
+    console.log('Attempting to connect to database...');
+    const clientActionResult = await clientAction();
+
+    if (clientActionResult.success === false) {
+      console.error('Client action failed:', clientActionResult.message);
+      return { success: false, message: clientActionResult.message || "Database connection failed" };
+    }
+
+    if (!clientActionResult.databases) {
+      console.error('Database connection missing from client action result');
+      return { success: false, message: "Database connection not available" };
+    }
+
+    const databases = clientActionResult.databases;
+    const storage = clientActionResult.storage;
+    console.log('Database and storage connections established successfully');
+
+    console.log('=== CREATING CAMPAIGN ===');
+    console.log('Campaign name:', campaignData.name);
+    console.log('Platform:', campaignData.platform);
+    console.log('Budget:', campaignData.budget);
+
+    // Create campaign payload
+    const campaignPayload = {
+      userId: userId,
+      name: campaignData.name || '',
+      platform: campaignData.platform || '',
+      budget: parseFloat(campaignData.budget) || 0,
+      budgetType: campaignData.budgetType || 'daily',
+      currency: campaignData.currency || 'USD',
+      dateRangeStart: campaignData.dateRange?.start || null,
+      dateRangeEnd: campaignData.dateRange?.end || null,
+      description: campaignData.description || '',
+      enhanceWithAI: campaignData.enhanceWithAI || false,
+      status: 'draft'
+    };
+
+    // Note: Platform-specific data is logged but not stored due to database limits
+    // In the future, this can be stored in a separate collection or when limits are increased
+    console.log('Platform-specific data (not stored):', {
+      platform: campaignData.platform,
+      reddit: campaignData.platform === 'reddit' ? {
+        subreddit: campaignData.subreddit,
+        postType: campaignData.postType,
+        title: campaignData.title,
+        content: campaignData.content
+      } : null,
+      facebook: campaignData.platform === 'facebook' ? {
+        objective: campaignData.objective,
+        audience: campaignData.audience,
+        adFormat: campaignData.adFormat,
+        creative: campaignData.creative
+      } : null,
+      instagram: campaignData.platform === 'instagram' ? {
+        contentType: campaignData.contentType,
+        caption: campaignData.caption,
+        hashtags: campaignData.hashtags,
+        targetAudience: campaignData.targetAudience
+      } : null,
+      hackernews: campaignData.platform === 'hackernews' ? {
+        title: campaignData.title,
+        contentType: campaignData.contentType,
+        url: campaignData.url,
+        submissionContent: campaignData.submissionContent
+      } : null
+    });
+
+    console.log('Campaign payload prepared:', {
+      userId,
+      platform: campaignPayload.platform,
+      name: campaignPayload.name,
+      budget: campaignPayload.budget,
+      budgetType: campaignPayload.budgetType
+    });
+
+    const campaignId = ID.unique();
+
+    // Validate campaign payload before processing
+    console.log('Validating campaign payload...');
+    console.log('Campaign payload (before files):', JSON.stringify(campaignPayload, null, 2));
+
+    // Handle file uploads before saving campaign
+    let uploadErrors = [];
+
+    try {
+      console.log('Processing file uploads...');
+
+      // Handle single file (Reddit mediaFile)
+      if (campaignData.mediaFile) {
+        console.log('Uploading single media file...');
+        console.log('Media file object type:', typeof campaignData.mediaFile);
+        console.log('Media file details:', {
+          name: campaignData.mediaFile?.name,
+          type: campaignData.mediaFile?.type,
+          size: campaignData.mediaFile?.size,
+          constructor: campaignData.mediaFile?.constructor?.name,
+          isFile: campaignData.mediaFile instanceof File,
+          isBlob: campaignData.mediaFile instanceof Blob
+        });
+
+        try {
+          const uploadedFile = await uploadFiles(storage, [campaignData.mediaFile], campaignId);
+          if (uploadedFile.length > 0) {
+            campaignPayload.mediaFileUrl = uploadedFile[0].url;
+            campaignPayload.mediaFileId = uploadedFile[0].id;
+            console.log('Single file uploaded successfully');
+          } else {
+            console.warn('No files were successfully uploaded from single file');
+          }
+        } catch (singleFileError) {
+          console.error('Single file upload failed:', singleFileError.message);
+          uploadErrors.push(`Failed to upload file: ${singleFileError.message}`);
+        }
+      }
+
+      // Handle multiple files (Facebook/Instagram mediaFiles)
+      if (campaignData.mediaFiles && campaignData.mediaFiles.length > 0) {
+        console.log(`Uploading ${campaignData.mediaFiles.length} media files...`);
+        console.log('Media files array details:', campaignData.mediaFiles.map((file, index) => ({
+          index,
+          name: file?.name,
+          type: file?.type,
+          size: file?.size,
+          constructor: file?.constructor?.name,
+          isFile: file instanceof File,
+          isBlob: file instanceof Blob
+        })));
+
+        try {
+          const uploadedFiles = await uploadFiles(storage, campaignData.mediaFiles, campaignId);
+          if (uploadedFiles.length > 0) {
+            campaignPayload.mediaFileUrls = JSON.stringify(uploadedFiles.map(f => f.url));
+            campaignPayload.mediaFileIds = JSON.stringify(uploadedFiles.map(f => f.id));
+            console.log('Multiple files uploaded successfully');
+          } else {
+            console.warn('No files were successfully uploaded from multiple files array');
+          }
+        } catch (multipleFilesError) {
+          console.error('Multiple files upload failed:', multipleFilesError.message);
+          uploadErrors.push(`Failed to upload files: ${multipleFilesError.message}`);
+        }
+      }
+
+      console.log('File upload processing completed');
+
+      // If files were provided but failed to upload, inform the user
+      if (uploadErrors.length > 0) {
+        console.warn('File upload errors occurred:', uploadErrors);
+      }
+
+    } catch (uploadError) {
+      console.error("File upload processing failed:", uploadError.message);
+      uploadErrors.push(`File upload processing failed: ${uploadError.message}`);
+    }
+
+    console.log('Creating campaign document...');
+
+    try {
+      const document = await databases.createDocument(
+        process.env.DATABASE_ID,
+        process.env.CAMPAIGNS_COLLECTION,
+        campaignId,
+        campaignPayload
+      );
+
+      console.log('Campaign successfully created in Appwrite:', document.$id);
+
+      // Provide feedback about upload issues if any occurred
+      let successMessage = "Campaign created successfully!";
+      if (uploadErrors.length > 0) {
+        successMessage = "Campaign created successfully, but some files failed to upload. You can edit the campaign later to add media files.";
+      }
+
+      return {
+        success: true,
+        message: successMessage,
+        campaignId: document.$id,
+        data: document,
+        uploadErrors: uploadErrors.length > 0 ? uploadErrors : undefined
+      };
+
+    } catch (dbError) {
+      console.error("Campaign creation failed:", dbError);
+
+      return {
+        success: false,
+        message: `Failed to create campaign: ${dbError.message || 'Unknown error'}`
+      };
+    }
+
+  } catch (error) {
+    console.error("Create campaign error:", error);
+    return {
+      success: false,
+      message: "Failed to create campaign. Please try again."
+    };
+  }
+}

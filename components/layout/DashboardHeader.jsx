@@ -25,13 +25,24 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
+import { LogoutUser } from '@/appwrite/logOut'
+import { useRouter } from 'next/navigation'
+
 
 export function DashboardHeader({ className }) {
   const { theme, setTheme } = useTheme()
+  const router = useRouter()
 
   const toggleTheme = () => {
     setTheme(theme === 'dark' ? 'light' : 'dark')
   }
+  const handleLogOut = async() => {
+    const resp = await LogoutUser()
+    if(resp.success) {
+      router.push('/')
+    }
+  }
+
 
 
   return (
@@ -106,7 +117,7 @@ export function DashboardHeader({ className }) {
                 <span>Help & Support</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-red-600">
+              <DropdownMenuItem className="text-red-600" onClick={handleLogOut}>
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>Log out</span>
               </DropdownMenuItem>

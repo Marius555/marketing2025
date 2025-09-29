@@ -1,41 +1,9 @@
 'use client'
 
-import {
-  MessagesSquare,
-  Users2,
-  Image,
-  Terminal
-} from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-
-const platforms = [
-  {
-    id: 'reddit',
-    name: 'Reddit',
-    description: 'Community discussions',
-    icon: MessagesSquare
-  },
-  {
-    id: 'facebook',
-    name: 'Facebook',
-    description: 'Social advertising',
-    icon: Users2
-  },
-  {
-    id: 'instagram',
-    name: 'Instagram',
-    description: 'Visual content',
-    icon: Image
-  },
-  {
-    id: 'hackernews',
-    name: 'Hacker News',
-    description: 'Tech community',
-    icon: Terminal
-  }
-]
+import { platforms } from '@/lib/platforms'
 
 export function PlatformSelector({ onSelect }) {
   return (
@@ -52,7 +20,7 @@ export function PlatformSelector({ onSelect }) {
             <CardContent className="p-2">
               <div className="flex items-center space-x-2">
                 <div className="h-8 w-8 rounded-lg border bg-muted flex items-center justify-center transition-transform group-hover:scale-105">
-                  <Icon className="h-4 w-4 text-foreground" />
+                  <Icon size={16} className="text-foreground" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <CardTitle className="text-sm font-medium group-hover:text-primary transition-colors leading-tight">

@@ -6,7 +6,10 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "setup-database": "node scripts/setupDatabase.js",
+    "check-database": "node scripts/checkDatabase.js",
+    "fix-database": "node scripts/fixDatabase.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -41,6 +44,7 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "date-fns": "^4.1.0",
+    "dotenv": "^17.2.2",
     "embla-carousel-react": "^8.6.0",
     "jose": "^6.1.0",
     "lucide-react": "^0.544.0",
